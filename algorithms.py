@@ -1,3 +1,8 @@
+import random
+
+# -----------------------------------------------------------------------------
+# BUBBLE SORT IMPLEMENTATION
+# -----------------------------------------------------------------------------
 def bubble_sort(arr):
     n = len(arr)
     for i in range(n - 1):
@@ -5,50 +10,22 @@ def bubble_sort(arr):
             if arr[j] > arr[j + 1]:
                 arr[j], arr[j + 1] = arr[j+ 1], arr[j]
                 yield arr, [j, j+1] 
-
             else:
                  yield arr, [j, j+1]
 
 # -----------------------------------------------------------------------------
 # MERGE SORT IMPLEMENTATION
-# NOTE: This is split into 3 functions to handle the recursion with Python's
-# 'yield' generator system:
-#
-# 1. merge_sort(arr): The "Wrapper"
-#    - The main entry point. It hides the complexity of indices (start/end)
-#    - It simply calls the recursive function on the whole list.
-#
-# 2. merge_sort_recursive(arr, start, end): The "Splitter"
-#    - Handles the "Divide" phase of Divide-and-Conquer.
-#    - It recursively splits the list into smaller halves using 'yield from'.
-#
-# 3. merge(arr, start, mid, end): The "Worker"
-#    - Handles the "Conquer" phase.
-#    - This is where the actual sorting happens and where we yield the
-#      visual updates (bar movements) to the screen.
 # -----------------------------------------------------------------------------
-
 def merge_sort(arr):
-    """
-    Starts the recursive merge sort.
-    """
+    """Starts the recursive merge sort."""
     yield from merge_sort_recursive(arr, 0, len(arr) - 1)
 
 def merge_sort_recursive(arr, start, end):
-    """
-    Recursive helper function.
-    Uses 'yield from' to pass animation steps up to the main loop.
-    """
+    """Recursive helper function."""
     if start < end:
         mid = (start + end) // 2
-
-        # Sort left half
         yield from merge_sort_recursive(arr, start, mid)
-        
-        # Sort right half
         yield from merge_sort_recursive(arr, mid + 1, end)
-        
-        # Merge the two halves
         yield from merge(arr, start, mid, end)
 
 def merge(arr, start, mid, end):
@@ -83,3 +60,89 @@ def merge(arr, start, mid, end):
         yield arr, [k]
         j += 1
         k += 1
+
+# -----------------------------------------------------------------------------
+# QUICK SORT IMPLEMENTATION
+# -----------------------------------------------------------------------------
+def quick_sort(arr):
+    """Starts the recursive quick sort."""
+    yield from quick_sort_recursive(arr, 0, len(arr) - 1)
+
+def quick_sort_recursive(arr, low, high):
+    """Recursive helper function."""
+    if low < high:
+        pivot_index = yield from partition(arr, low, high)
+        yield from quick_sort_recursive(arr, low, pivot_index - 1)
+        yield from quick_sort_recursive(arr, pivot_index + 1, high)
+
+def partition(arr, low, high):
+    """Partitions the array around a pivot."""
+    pivot = arr[high]
+    i = low - 1
+
+    for j in range(low, high):
+        yield arr, [j, high]
+        if arr[j] < pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+            yield arr, [i, j]
+
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    yield arr, [i + 1, high]
+    return i + 1
+
+# -----------------------------------------------------------------------------
+# RADIX SORT IMPLEMENTATION
+# -----------------------------------------------------------------------------
+def radix_sort(arr):
+    """Main entry point for Radix Sort."""
+    if not arr:
+        return
+
+    max_val = max(arr)
+    exp = 1
+    while max_val // exp > 0:
+        yield from counting_sort_on_digit(arr, exp)
+        exp *= 10
+
+def counting_sort_on_digit(arr, exp):
+    n = len(arr)
+    output = [0] * n
+    count = [0] * 10
+
+    for i in range(n):
+        index = (arr[i] // exp) % 10
+        count[index] += 1
+
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+
+    i = n - 1
+    while i >= 0:
+        index = (arr[i] // exp) % 10
+        output[count[index] - 1] = arr[i]
+        count[index] -= 1
+        i -= 1
+
+    for i in range(n):
+        arr[i] = output[i]
+        yield arr, [i]
+
+# -----------------------------------------------------------------------------
+# LINEAR SEARCH IMPLEMENTATION
+# -----------------------------------------------------------------------------
+def linear_search_wrapper(arr):
+    """Wrapper to pick a random target and start the search."""
+    if not arr:
+        return
+        
+    target = random.choice(arr)
+    yield from linear_search(arr, target)
+
+def linear_search(arr, target):
+    """Iterates through the list until the target is found."""
+    for i in range(len(arr)):
+        yield arr, [i]
+        if arr[i] == target:
+            yield arr, [i]
+            return
