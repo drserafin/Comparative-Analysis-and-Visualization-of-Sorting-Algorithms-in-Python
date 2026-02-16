@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import time
 from algorithms import bubble_sort, merge_sort, quick_sort, radix_sort, linear_search_wrapper
 
 pygame.init()
@@ -383,6 +384,9 @@ def main():
     current_algo_gen = bubble_sort
     current_input_mode = "Random"
     sorting = False
+    start_time = None
+    elapsed_time = 0
+    accumulated_time = 0
     
     # 1. GENERATE INITIAL LIST
     lst = generate_list(N, MIN_VAL, MAX_VAL, current_input_mode)
@@ -441,6 +445,7 @@ def main():
             try:
                 row, color_indices = next(algo_generator)
                 color_map = {idx: Theme.BAR_ACTIVE for idx in color_indices}
+                elapsed_time = accumulated_time + (time.time() - start_time)
             except StopIteration:
                 sorting = False
                 color_map = {}
@@ -487,6 +492,7 @@ def main():
         draw_sidebar_text(draw_info.window, "INPUT CONDITION", sidebar_x, 210, draw_info.font_sm)
         draw_sidebar_text(draw_info.window, f"ARRAY SIZE: {slider_size.value}", sidebar_x, 340, draw_info.font_sm)
         draw_sidebar_text(draw_info.window, f"SPEED: {slider_speed.value}%", sidebar_x, 410, draw_info.font_sm)
+        draw_sidebar_text(draw_info.window, f"TIME: {elapsed_time:.2f}s", sidebar_x, 480, draw_info.font_sm)
 
         # Buttons
         for btn in algo_buttons + input_buttons:
@@ -559,16 +565,23 @@ def main():
                     # Start
                     if btn_start.check_click(event.pos):
                         sorting = True
+                        start_time = time.time()
                         algo_generator = current_algo_gen(draw_info.lst)
                     
                     # Reset
                     if btn_reset.check_click(event.pos):
                         sorting = False
+                        start_time = None
+                        elapsed_time = 0
+                        accumulated_time = 0
                         draw_info.set_list(generate_list(N, MIN_VAL, MAX_VAL, current_input_mode))
                 else:
                     # Allow Stop while sorting
                     if btn_start.check_click(event.pos):
+                        accumulated_time += (time.time() - start_time)
+                        elapsed_time = accumulated_time
                         sorting = False
+                        start_time = None
 
     pygame.quit()
 
