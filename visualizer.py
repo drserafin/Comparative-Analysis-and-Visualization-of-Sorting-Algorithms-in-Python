@@ -1,6 +1,5 @@
 import pygame
 import random
-import math
 import time
 from algorithms import bubble_sort, merge_sort, quick_sort, radix_sort, linear_search_wrapper
 
